@@ -1,0 +1,22 @@
+{
+  "name": "cfsw",
+  "authors": [
+    "xpf"
+  ],
+  "description": "vue node app",
+  "main": "app.js",
+  "keywords": [
+    "Node.js",
+    "MongoDB"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/libs",
+    "test",
+    "tests"
+  ]
+}
