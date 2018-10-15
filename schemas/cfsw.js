@@ -2,16 +2,31 @@ var mongoose = require('mongoose');
 
 // 用户注册
 var usermes = new mongoose.Schema({
-    nickname: String,
-    name: String,
-    password: String,
-    sex: String,
-    age: Number,
+    nickname: {
+        type: String, // 或者'string'
+        required: true  //字段必填
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    sex: {
+        type: String,
+        required: true
+    },
+    age: { 
+        type: Number,
+        required: true
+    },
     // meta 更新或录入数据的时间记录
     createtime: {
         type: Date,
         default: Date.now()
-    },
+    }
 });
 // 静态方法
 usermes.statics = {
@@ -34,9 +49,18 @@ usermes.statics = {
 
 // 首页
 var chatroomsg = new mongoose.Schema({
-    nickname: String,
-    title:String,
-    msg: String,
+    nickname: {
+        type: String,
+        required: true
+    },
+    title: {
+        type: String,
+        required: true
+    },
+    msg: {
+        type: String,
+        required: true
+    },
     click: {
         num: Number,
         name: Array
@@ -66,11 +90,6 @@ chatroomsg.statics = {
              .find({_id: id})
              .exec(cb)
     }
-    // insertOne: function (, cb) {
-    //     return this
-    //         .insert({})
-    //         .exec(cb)
-    // }
 }
 // 导出movieSchema模式
 module.exports = {

@@ -60,8 +60,53 @@ app.post('/api/user/register', function (req, res) {
                     if (err) {
                         console.log(err);
                     }
-                    var mes = "注册成功!";
-                    res.json({mes: mes,});
+                    allmodle.usermes.findByNickname(nickname, function (err, mes) {
+                        var idcomment = mes._id + 'comment';
+                        var idcomments = new mongoose.Schema({
+                            comment: [{
+                                title: String,
+                                msg: String
+                            }],
+                            replyname: Array,
+                        });
+                        var idcomm = mongoose.model(idcomment, idcomments);
+                        var idcom = new idcomm({
+                            comment: [],
+                            replyname: []
+                        })
+                        idcom.save(function(err, idcom) {
+                            if (err) {
+                                console.log(err);
+                                var mes = "请求错误!";
+                                res.json({mes: mes});
+                            } else {
+                                var idreply = mes._id + 'reply';
+                                var idreplys = new mongoose.Schema({
+                                reply: [{
+                                    title: String,
+                                    comment: String,
+                                    msg: String
+                                }],
+                                    replyname: Array
+                                })
+                                var idrepl = mongoose.model(idreply, idreplys);
+                                var idrep = new idrepl({
+                                    reply: [],
+                                    replyname: []
+                                })
+                                idrep.save(function(err, rep) {
+                                    if (err) {
+                                        var mes = "请求错误!";
+                                        res.json({mes: mes});
+                                        console.log(err);
+                                    } else {
+                                        var mes = "注册成功!";
+                                        res.json({mes: mes,}); 
+                                    }
+                                })
+                            }
+                        })
+                    })               
                 });
             } else if (nk !== null) {
                  var mes = "此昵称已存在!";
@@ -162,8 +207,14 @@ app.post('/api/user/publish', function (req, res) {
             if (err) {
                 console.log(err);
             }
-            var mes = "发表成功!";
-            res.json({mes: mes,});
+            var mes;
+            if (publish === undefined) {
+                mes = "error"
+                res.json({mes: mes})
+            } else {
+                mes = "发表成功!";
+                res.json({mes: mes});
+            }  
         });           
 });
 
@@ -185,28 +236,29 @@ app.post('/api/user/detail', function (req, res) {
 app.post('/api/user/artic/agree', function (req, res) {
     var arr = req.body.nickname
     allmodle.chatroomsg.findOne(req.body.id, function (err, one) {
-        console.log(one)
         if (err) {
-                console.log(err);
+            mes = "请求错误!";
+            res.json({mes: mes});
+            console.log(err);
         }
-        if (req.body.count === -1) {
-            one[0].click.num--;
-            var index = one[0].click.name.indexOf(req.body.nickname);
-            console.log(index)
+        var index = one[0].click.name.indexOf(req.body.nickname);
+        if (index !== -1) {
             one[0].click.name.splice(index, 1);
+            one[0].click.num--;
+            mes = '取消成功!';
         } else {
             one[0].click.num++;
             one[0].click.name.push(arr);
+            mes = "点赞成功!";
         }
-        console.log(one)
         var _chatroomsg = new allmodle.chatroomsg(one[0]);
         _chatroomsg.save(function (err, acomment) {
+            console.log(acomment);
             if (err) {
                 console.log(err);
-                var mes = "请求错误!";
+                mes = "请求错误!";
                 res.json({mes: mes});
             }
-            var mes = "点赞成功!";
             res.json({mes: mes});
         });
     });
@@ -247,24 +299,27 @@ app.post('/api/user/agree/comment', function (req, res) {
     var arr = req.body.nickname
     allmodle.chatroomsg.findOne(req.body.id, function (err, one) {
         if (err) {
-                console.log(err);
+            console.log(err);
+            mes = "请求错误!";
+            res.json({mes: mes});
         }
-        if (req.body.count === -1) {
-            one[0].commentxt[req.body.index].c_agree.num--;
-            var index = one[0].commentxt[req.body.index].c_agree.name.indexOf(req.body.nickname);
+        var index = one[0].commentxt[req.body.index].c_agree.name.indexOf(req.body.nickname);
+        if (index !== -1) {
             one[0].commentxt[req.body.index].c_agree.name.splice(index, 1);
+            one[0].commentxt[req.body.index].c_agree.num--;
+            mes = '取消成功!';
         } else {
             one[0].commentxt[req.body.index].c_agree.num++;
             one[0].commentxt[req.body.index].c_agree.name.push(arr);
+            mes = "点赞成功!";
         }
         var _chatroomsg = new allmodle.chatroomsg(one[0]);
         _chatroomsg.save(function (err, acomment) {
             if (err) {
                 console.log(err);
-                var mes = "请求错误!";
+                mes = "请求错误!";
                 res.json({mes: mes});
             }
-            var mes = "点赞成功!";
             res.json({mes: mes});
         });
     });
