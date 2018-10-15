@@ -27,8 +27,17 @@ var _underscore = require('underscore'); // _.extend用新对象里的字段替�
 var allmodle = require('./models/cfsw.js'); // 载入mongoose编译后的模型movie
 
 
+
+app.all('*', function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "content-type");
+    res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
+    // res.header("Content-Type", "text/html; charset=utf-8");
+    next();
+});
+
 // 用户注册
-app.post('/user/register', function (req, res) {
+app.post('/api/user/register', function (req, res) {
     var usermes = null;
     var nickname = req.body.nickname;
     if (nickname !== 'undefined') {
@@ -63,25 +72,29 @@ app.post('/user/register', function (req, res) {
 });
 
 // 用户登录
-app.post('/user/login', function (req, res) {
+app.post('/api/user/login', function (req, res) {
     var nickname = req.body.nickname;
     var password = req.body.password;
-    allmodle.usermes.findByNP(nickname, password, function (err, np) {
-        if (err) {
-            console.log(err);
-            var mes = "请求错误!";
-            res.json({mes: mes});   
-        } else if (np.length > 0) {
-            res.json({nickname: np[0].nickname});
-        } else if (np.length === 0) {
-            var mes = "用户名或密码错误!";
-            res.json({mes: mes});
-        }
-    });
+    try {
+        allmodle.usermes.findByNP(nickname, password, function (err, np) {
+            if (err) {
+                console.log(err);
+                var mes = "请求错误!";
+                res.json({mes: mes});   
+            } else if (np.length > 0) {
+                res.json({nickname: np[0].nickname});
+            } else if (np.length === 0) {
+                var mes = "用户名或密码错误!";
+                res.json({mes: mes});
+            }
+        });
+    } catch (err) {
+        res.json({code: 500});
+    }
 });
 
 // 重置密码
-app.post('/user/reset', function (req, res) {
+app.post('/api/user/reset', function (req, res) {
     var nickname = req.body.nickname;
     var name = req.body.name;
     var sex = req.body.sex;
@@ -107,7 +120,7 @@ app.post('/user/reset', function (req, res) {
 });
 
 // 首页信息条目
-app.get('/user/chatroomsg', function (req, res) {
+app.get('/api/user/chatroomsg', function (req, res) {
     var page,limit;
     if (typeof(req.query.page)  === 'string') {
         page = req.query.page * req.query.limit;
@@ -130,7 +143,7 @@ app.get('/user/chatroomsg', function (req, res) {
 });
 
 // 发表文章
-app.post('/user/publish', function (req, res) {
+app.post('/api/user/publish', function (req, res) {
     var publish = null;
         publish = new allmodle.chatroomsg({
             nickname: req.body.nickname,
@@ -155,7 +168,7 @@ app.post('/user/publish', function (req, res) {
 });
 
 // 详情页
-app.post('/user/detail', function (req, res) {
+app.post('/api/user/detail', function (req, res) {
     var id = req.body.id;
     allmodle.chatroomsg.findOne(id, function (err, one) {
         if (err) {
@@ -163,13 +176,13 @@ app.post('/user/detail', function (req, res) {
             var mes = "请求错误!";
             res.json({mes: mes});
         } else  {
-            res.json({mes: one});
+            res.json({mes: one[0]});
         }
     });
 });
 
 // 点赞文章
-app.post('/user/artic/agree', function (req, res) {
+app.post('/api/user/artic/agree', function (req, res) {
     var arr = req.body.nickname
     allmodle.chatroomsg.findOne(req.body.id, function (err, one) {
         console.log(one)
@@ -200,7 +213,7 @@ app.post('/user/artic/agree', function (req, res) {
 });
 
 // 评论
-app.post('/user/comment', function (req, res) {
+app.post('/api/user/comment', function (req, res) {
     var obj = {
         c_name: req.body.nickname,
         c_time: Date.now(),
@@ -230,7 +243,7 @@ app.post('/user/comment', function (req, res) {
 });
 
 // 点赞评论
-app.post('/user/agree/comment', function (req, res) {
+app.post('/api/user/agree/comment', function (req, res) {
     var arr = req.body.nickname
     allmodle.chatroomsg.findOne(req.body.id, function (err, one) {
         if (err) {
@@ -258,7 +271,7 @@ app.post('/user/agree/comment', function (req, res) {
 });
 
 // 浏览量
-app.post('/user/view', function (req, res) {
+app.post('/api/user/view', function (req, res) {
     var arr = req.body.nickname
     allmodle.chatroomsg.findOne(req.body.id, function (err, one) {
         if (err) {
